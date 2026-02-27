@@ -8,35 +8,30 @@ import anthropic
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+from chromadb.utils import embedding_functions
+import chromadb
 
 app = FastAPI(title="Document Q&A API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten to your Vercel URL in production
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 CHROMA_DIR = "./chroma_db"
-_embeddings = None
+COLLECTION = "documents"
+
+# Use chromadb's built-in embedding (no torch needed)
+_ef = embedding_functions.DefaultEmbeddingFunction()
+_client = chromadb.PersistentClient(path=CHROMA_DIR)
 
 
-def get_embeddings():
-    global _embeddings
-    if _embeddings is None:
-        _embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-    return _embeddings
-
-
-def get_vectorstore():
-    return Chroma(
-        persist_directory=CHROMA_DIR,
-        embedding_function=get_embeddings(),
-        collection_name="documents",
+def get_collection():
+    return _client.get_or_create_collection(
+        name=COLLECTION,
+        embedding_function=_ef,
     )
 
 
@@ -45,14 +40,12 @@ class QueryRequest(BaseModel):
     question: str
     api_key: str
 
-
 class Source(BaseModel):
     index: int
     file: str
     page: int | str
     snippet: str
     relevance_score: float
-
 
 class QueryResponse(BaseModel):
     answer: str
@@ -62,7 +55,7 @@ class QueryResponse(BaseModel):
 # ── Routes ────────────────────────────────────────────────────────────────────
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "Document Q&A API is running"}
+    return {"status": "ok", "message": "DocMind API is running"}
 
 
 @app.post("/upload")
@@ -88,16 +81,16 @@ async def upload_pdf(file: UploadFile = File(...)):
         separators=["\n\n", "\n", ".", " "],
     )
     chunks = splitter.split_documents(pages)
-    for chunk in chunks:
-        chunk.metadata["source_file"] = file.filename
 
-    vectorstore = Chroma.from_documents(
-        documents=chunks,
-        embedding=get_embeddings(),
-        persist_directory=CHROMA_DIR,
-        collection_name="documents",
+    col = get_collection()
+    col.add(
+        documents=[c.page_content for c in chunks],
+        metadatas=[{
+            "source_file": file.filename,
+            "page": str(c.metadata.get("page", "?")),
+        } for c in chunks],
+        ids=[f"{file.filename}-{i}" for i in range(len(chunks))],
     )
-    vectorstore.persist()
 
     return {"filename": file.filename, "chunks": len(chunks)}
 
@@ -108,26 +101,27 @@ async def query(req: QueryRequest):
         raise HTTPException(400, "Invalid Anthropic API key.")
 
     try:
-        vs = get_vectorstore()
-        results = vs.similarity_search_with_score(req.question, k=4)
+        col = get_collection()
+        results = col.query(query_texts=[req.question], n_results=4)
     except Exception as e:
         raise HTTPException(500, f"Vector search failed: {str(e)}")
 
+    docs      = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
+
     context_parts = []
     sources = []
-    for i, (doc, score) in enumerate(results, 1):
-        page = doc.metadata.get("page", "?")
-        src  = doc.metadata.get("source_file", "unknown")
-        display_page = page + 1 if isinstance(page, int) else page
-        context_parts.append(
-            f"[Source {i} | File: {src} | Page: {display_page}]\n{doc.page_content}"
-        )
+    for i, (doc, meta, dist) in enumerate(zip(docs, metadatas, distances), 1):
+        page = meta.get("page", "?")
+        src  = meta.get("source_file", "unknown")
+        context_parts.append(f"[Source {i} | File: {src} | Page: {page}]\n{doc}")
         sources.append(Source(
             index=i,
             file=src,
-            page=display_page,
-            snippet=doc.page_content[:200] + "...",
-            relevance_score=round(1 - float(score), 3),
+            page=page,
+            snippet=doc[:200] + "...",
+            relevance_score=round(1 - float(dist), 3),
         ))
 
     context = "\n\n---\n\n".join(context_parts)
@@ -145,8 +139,8 @@ Be concise but complete.""",
             messages=[{"role": "user", "content": f"Document excerpts:\n\n{context}\n\n---\n\nQuestion: {req.question}"}],
         )
     except anthropic.AuthenticationError:
-        raise HTTPException(401, "Invalid API key — check your Anthropic key.")
-    except anthropic.BadRequestError as e:
-        raise HTTPException(402, str(e))
+        raise HTTPException(401, "Invalid API key.")
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
     return QueryResponse(answer=response.content[0].text, sources=sources)
