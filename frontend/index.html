@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DocMind — AI Document Q&A</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       --bg:#080c10;--surface:#0d1117;--surface2:#161b22;--border:#21262d;
       --accent:#00e5ff;--accent2:#7c3aed;--text:#e6edf3;--muted:#6e7681;
       --success:#3fb950;--error:#f85149;--radius:8px;
-      --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+      --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
     }
     html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden}
 
@@ -20,7 +21,8 @@
 
     /* Topbar */
     .topbar{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px}
-    .logo{font-weight:800;font-size:18px;letter-spacing:-.5px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}    .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .logo{font-weight:700;font-size:18px;letter-spacing:-.3px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
     .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);transition:background .3s}
     .status-dot.ready{background:var(--success);box-shadow:0 0 6px var(--success)}
     .status-text{font-family:var(--mono);font-size:11px;color:var(--muted)}
@@ -111,8 +113,21 @@
     .msg.assistant .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--accent2))}
     .msg-body{flex:1;min-width:0}
     .msg-role{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-    .msg-content{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+    .msg-content{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:14px;line-height:1.7;word-break:break-word}
     .msg.user .msg-content{background:var(--surface2);border-color:var(--accent2)}
+    /* Markdown rendering */
+    .msg-content h1,.msg-content h2,.msg-content h3{font-weight:600;margin:12px 0 6px;line-height:1.3}
+    .msg-content h1{font-size:16px}.msg-content h2{font-size:15px}.msg-content h3{font-size:14px}
+    .msg-content p{margin-bottom:8px}
+    .msg-content p:last-child{margin-bottom:0}
+    .msg-content ul,.msg-content ol{margin:6px 0 8px 20px}
+    .msg-content li{margin-bottom:4px}
+    .msg-content strong{font-weight:600;color:var(--text)}
+    .msg-content em{font-style:italic;color:var(--muted)}
+    .msg-content code{font-family:var(--mono);font-size:12px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
+    .msg-content pre{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;overflow-x:auto;margin:8px 0}
+    .msg-content pre code{background:none;border:none;padding:0;font-size:12px}
+    .msg-content blockquote{border-left:3px solid var(--accent);padding-left:12px;color:var(--muted);margin:8px 0}
     .model-badge{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
     .model-badge span{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--accent)}
 
@@ -403,7 +418,7 @@ function appendAnswer(answer, sources) {
     <div class="msg-avatar">AI</div>
     <div class="msg-body">
       <div class="model-badge">${p?.icon} <span>${mLabel}</span></div>
-      <div class="msg-content">${escHtml(answer)}</div>
+      <div class="msg-content">${renderMarkdown(answer)}</div>
       <button class="sources-toggle" onclick="toggleSources('${id}')"><span>▸</span> ${sources.length} source(s)</button>
       <div class="sources-panel" id="${id}">
         ${sources.map(s=>`
@@ -438,6 +453,10 @@ function toast(msg,type=""){
   clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("show"),3000);
 }
 function escHtml(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function renderMarkdown(s){
+  if(typeof marked === 'undefined') return escHtml(s);
+  return marked.parse(s, {breaks: true, gfm: true});
+}
 
 const dz=document.getElementById("dropzone");
 dz.addEventListener("dragover",e=>{e.preventDefault();dz.classList.add("dragover")});
