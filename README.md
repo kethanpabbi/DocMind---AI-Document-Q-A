@@ -4,7 +4,7 @@ Upload PDFs, ask questions, get accurate answers with source citations.
 Supports 6 AI providers and multiple models per provider.
 
 **Live Demo:** [doc-mind-ai-document-q-a.vercel.app](https://doc-mind-ai-document-q-a.vercel.app)
-
+**Medium Blog:** [medium.com/@kethanpabbi/i-built-docmind-anai-document-q-a-system-that-supports-6-llm-providers](https://medium.com/@kethanpabbi/i-built-docmind-anai-document-q-a-system-that-supports-6-llm-providers-heres-how-de0182856340)
 ---
 
 ## Features
