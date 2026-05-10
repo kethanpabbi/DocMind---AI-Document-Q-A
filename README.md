@@ -70,19 +70,26 @@ Question → embed query → retrieve top 4 chunks
 ### Architecture Diagram
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'primaryTextColor': '#ff0000', 'lineColor': '#000000'}}}%%
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'background': '#ffffff',
+    'primaryColor': '#000000',
+    'primaryTextColor': '#ff0000',
+    'primaryBorderColor': '#000000',
+    'lineColor': '#000000',
+    'secondaryColor': '#000000',
+    'tertiaryColor': '#000000',
+    'clusterBkg': '#ffffff',
+    'clusterBorder': '#000000'
+  }
+}}%%
 flowchart TD
-    %% Define Styles
-    classDef default fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef boxStyle fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
-    linkStyle default stroke:#000000,stroke-width:2px,color:#ff0000;
-
     %% Subgraphs
     subgraph Frontend ["Frontend (Vanilla HTML/JS)"]
         UI[User Interface]
         Config[API Key & Model Selection]
     end
-    class UI,Config boxStyle;
 
     subgraph Backend ["Backend (FastAPI)"]
         API[API Router /main.py]
@@ -98,10 +105,8 @@ flowchart TD
             Router[Provider Router]
         end
     end
-    class API,Parse,Chunk,Search,PromptGen,Router boxStyle;
 
     VectorDB[(ChromaDB<br/>Local Vector DB)]
-    class VectorDB boxStyle;
 
     subgraph ExternalProviders ["External LLM APIs"]
         Anthropic[Anthropic API]
@@ -111,7 +116,6 @@ flowchart TD
         Cohere[Cohere API]
         Groq[Groq API]
     end
-    class Anthropic,OpenAI,Google,Mistral,Cohere,Groq boxStyle;
 
     %% Edges
     UI -- "1. Upload PDF (.pdf)" --> API
