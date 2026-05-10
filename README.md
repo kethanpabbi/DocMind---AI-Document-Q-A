@@ -73,15 +73,14 @@ Question → embed query → retrieve top 4 chunks
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'background': '#ffffff',
-    'primaryColor': '#000000',
+    'primaryColor': '#ffffff',
     'primaryTextColor': '#ff0000',
-    'primaryBorderColor': '#000000',
-    'lineColor': '#000000',
-    'secondaryColor': '#000000',
-    'tertiaryColor': '#000000',
-    'clusterBkg': '#ffffff',
-    'clusterBorder': '#000000'
+    'primaryBorderColor': '#ff0000',
+    'lineColor': '#add8e6',
+    'secondaryColor': '#ffffff',
+    'tertiaryColor': '#ffffff',
+    'clusterBkg': 'transparent',
+    'clusterBorder': '#ff0000'
   }
 }}%%
 flowchart TD
