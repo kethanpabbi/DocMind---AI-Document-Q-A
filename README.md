@@ -70,14 +70,14 @@ Question → embed query → retrieve top 4 chunks
 ### Architecture Diagram
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'background': '#ffffff'}}}%%
+%%{init: {'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'clusterBkg': '#ffffff', 'clusterBorder': '#000000', 'primaryTextColor': '#ff0000', 'lineColor': '#000000'}}}%%
 flowchart TD
     %% Define Styles
-    classDef default fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef frontend fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef backend fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef db fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef llm fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef default fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef frontend fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef backend fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef db fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef llm fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
     linkStyle default stroke:#000000,stroke-width:2px,color:#ff0000;
 
     %% Subgraphs
