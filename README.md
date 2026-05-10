@@ -74,10 +74,7 @@ Question → embed query → retrieve top 4 chunks
 flowchart TD
     %% Define Styles
     classDef default fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef frontend fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef backend fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef db fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
-    classDef llm fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef boxStyle fill:#000000,stroke:#000000,stroke-width:2px,color:#ff0000;
     linkStyle default stroke:#000000,stroke-width:2px,color:#ff0000;
 
     %% Subgraphs
@@ -85,7 +82,7 @@ flowchart TD
         UI[User Interface]
         Config[API Key & Model Selection]
     end
-    class Frontend frontend;
+    class UI,Config boxStyle;
 
     subgraph Backend ["Backend (FastAPI)"]
         API[API Router /main.py]
@@ -101,10 +98,10 @@ flowchart TD
             Router[Provider Router]
         end
     end
-    class Backend backend;
+    class API,Parse,Chunk,Search,PromptGen,Router boxStyle;
 
     VectorDB[(ChromaDB<br/>Local Vector DB)]
-    class VectorDB db;
+    class VectorDB boxStyle;
 
     subgraph ExternalProviders ["External LLM APIs"]
         Anthropic[Anthropic API]
@@ -114,7 +111,7 @@ flowchart TD
         Cohere[Cohere API]
         Groq[Groq API]
     end
-    class ExternalProviders llm;
+    class Anthropic,OpenAI,Google,Mistral,Cohere,Groq boxStyle;
 
     %% Edges
     UI -- "1. Upload PDF (.pdf)" --> API
