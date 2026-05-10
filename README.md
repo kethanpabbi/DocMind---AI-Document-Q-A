@@ -70,12 +70,15 @@ Question → embed query → retrieve top 4 chunks
 ### Architecture Diagram
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'background': '#ffffff'}}}%%
 flowchart TD
     %% Define Styles
-    classDef frontend fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px;
-    classDef backend fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px;
-    classDef db fill:#fff3e0,stroke:#fb8c00,stroke-width:2px;
-    classDef llm fill:#e8f5e9,stroke:#43a047,stroke-width:2px;
+    classDef default fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef frontend fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef backend fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef db fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
+    classDef llm fill:#ffffff,stroke:#000000,stroke-width:2px,color:#ff0000;
+    linkStyle default stroke:#000000,stroke-width:2px,color:#ff0000;
 
     %% Subgraphs
     subgraph Frontend ["Frontend (Vanilla HTML/JS)"]
