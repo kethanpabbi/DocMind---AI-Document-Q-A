@@ -22,14 +22,14 @@ Supports 6 AI providers and multiple models per provider.
 
 ## Supported Providers & Models
 
-| Provider   | Models |
-|------------|--------|
-| 🤖 Anthropic | Claude Haiku 3.5 (cheapest), Claude Sonnet 4 (best) |
-| ⚡ OpenAI   | GPT-4o Mini (cheapest), GPT-4o (best), GPT-4 Turbo, o1 Mini |
-| 🔷 Google   | Gemini 1.5 Flash (cheapest), Gemini 1.5 Pro (best), Gemini 2.0 Flash |
-| 🌪️ Mistral  | Mistral Small (cheapest), Mistral Large (best), Codestral |
-| 🌊 Cohere   | Command R (cheapest), Command R+ (best) |
-| 🚀 Groq     | Llama 3.1 8B (cheapest), Llama 3.3 70B (best), Mixtral 8x7B |
+| Provider     | Models                                                               |
+|--------------|----------------------------------------------------------------------|
+| 🤖 Anthropic | Claude Haiku 3.5 (cheapest), Claude Sonnet 4 (best)                  |
+| ⚡ OpenAI    | GPT-4o Mini (cheapest), GPT-4o (best), GPT-4 Turbo, o1 Mini          |
+| 🔷 Google    | Gemini 1.5 Flash (cheapest), Gemini 1.5 Pro (best), Gemini 2.0 Flash |
+| 🌪️ Mistral   | Mistral Small (cheapest), Mistral Large (best), Codestral            |
+| 🌊 Cohere    | Command R (cheapest), Command R+ (best)                              |
+| 🚀 Groq      | Llama 3.1 8B (cheapest), Llama 3.3 70B (best), Mixtral 8x7B          |
 
 ---
 
@@ -43,7 +43,7 @@ Supports 6 AI providers and multiple models per provider.
 
 ## Project Structure
 
-```
+```plaintext
 docmind/
 ├── backend/
 │   ├── main.py            # FastAPI app — upload, query, provider routing
@@ -59,7 +59,7 @@ docmind/
 
 ## How It Works
 
-```
+```plaintext
 PDF upload → text extraction → chunking (1000 chars, 150 overlap)
           → ChromaDB embeddings → stored in vector DB
 
@@ -78,21 +78,21 @@ flowchart TD
     classDef llm fill:#e8f5e9,stroke:#43a047,stroke-width:2px;
 
     %% Subgraphs
-    subgraph Frontend [Frontend (Vanilla HTML/JS)]
+    subgraph Frontend ["Frontend (Vanilla HTML/JS)"]
         UI[User Interface]
         Config[API Key & Model Selection]
     end
     class Frontend frontend;
 
-    subgraph Backend [Backend (FastAPI)]
+    subgraph Backend ["Backend (FastAPI)"]
         API[API Router /main.py]
         
-        subgraph Ingestion [PDF Ingestion]
+        subgraph Ingestion ["PDF Ingestion"]
             Parse[PyPDFLoader<br/>Extract Text]
             Chunk[LangChain<br/>Text Splitter]
         end
         
-        subgraph Query [Query Processing]
+        subgraph Query ["Query Processing"]
             Search[ChromaDB<br/>Similarity Search]
             PromptGen[Prompt Construction<br/>Inject Top 4 Contexts]
             Router[Provider Router]
@@ -103,7 +103,7 @@ flowchart TD
     VectorDB[(ChromaDB<br/>Local Vector DB)]
     class VectorDB db;
 
-    subgraph ExternalProviders [External LLM APIs]
+    subgraph ExternalProviders ["External LLM APIs"]
         Anthropic[Anthropic API]
         OpenAI[OpenAI API]
         Google[Google Gemini API]
@@ -150,6 +150,7 @@ flowchart TD
 ## Deployment
 
 ### Backend → Railway
+
 1. Push repo to GitHub
 2. Go to railway.app → New Project → Deploy from GitHub
 3. Set Root Directory to `backend`
@@ -158,11 +159,14 @@ flowchart TD
 6. Copy your Railway URL
 
 ### Frontend → Vercel
+
 1. Open `frontend/index.html`
 2. Replace `API_BASE` with your Railway URL:
+
    ```js
    const API_BASE = "https://your-app.up.railway.app";
    ```
+
 3. Go to vercel.com → New Project → Import from GitHub
 4. Set Root Directory to `frontend`
 5. Deploy — get your live Vercel URL
@@ -178,6 +182,7 @@ uvicorn main:app --reload
 ```
 
 In `frontend/index.html` set:
+
 ```js
 const API_BASE = "http://localhost:8000";
 ```
@@ -188,11 +193,11 @@ Then open `frontend/index.html` directly in your browser.
 
 ## Getting API Keys
 
-| Provider  | Link |
-|-----------|------|
-| Anthropic | https://console.anthropic.com |
-| OpenAI    | https://platform.openai.com/api-keys |
-| Google    | https://aistudio.google.com/app/apikey |
-| Mistral   | https://console.mistral.ai/api-keys |
-| Cohere    | https://dashboard.cohere.com/api-keys |
-| Groq      | https://console.groq.com/keys |
+| Provider  | Link                                     |
+|-----------|------------------------------------------|
+| Anthropic | <https://console.anthropic.com>          |
+| OpenAI    | <https://platform.openai.com/api-keys>   |
+| Google    | <https://aistudio.google.com/app/apikey> |
+| Mistral   | <https://console.mistral.ai/api-keys>    |
+| Cohere    | <https://dashboard.cohere.com/api-keys>  |
+| Groq      | <https://console.groq.com/keys>          |
