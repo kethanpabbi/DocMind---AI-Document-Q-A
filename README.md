@@ -6,6 +6,7 @@ Supports 6 AI providers and multiple models per provider.
 **Live Demo:** [doc-mind-ai-document-q-a.vercel.app](https://doc-mind-ai-document-q-a.vercel.app)
 
 **Medium Blog:** [Read the full writeup on Medium](https://medium.com/@kethanpabbi/i-built-docmind-anai-document-q-a-system-that-supports-6-llm-providers-heres-how-de0182856340)
+
 ---
 
 ## Features
@@ -43,7 +44,7 @@ Supports 6 AI providers and multiple models per provider.
 ## Project Structure
 
 ```
-document-qa-v2/
+docmind/
 ├── backend/
 │   ├── main.py            # FastAPI app — upload, query, provider routing
 │   ├── requirements.txt   # Python dependencies
@@ -64,6 +65,84 @@ PDF upload → text extraction → chunking (1000 chars, 150 overlap)
 
 Question → embed query → retrieve top 4 chunks
          → send to chosen AI provider → answer with source citations
+```
+
+### Architecture Diagram
+
+```mermaid
+flowchart TD
+    %% Define Styles
+    classDef frontend fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px;
+    classDef backend fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px;
+    classDef db fill:#fff3e0,stroke:#fb8c00,stroke-width:2px;
+    classDef llm fill:#e8f5e9,stroke:#43a047,stroke-width:2px;
+
+    %% Subgraphs
+    subgraph Frontend [Frontend (Vanilla HTML/JS)]
+        UI[User Interface]
+        Config[API Key & Model Selection]
+    end
+    class Frontend frontend;
+
+    subgraph Backend [Backend (FastAPI)]
+        API[API Router /main.py]
+        
+        subgraph Ingestion [PDF Ingestion]
+            Parse[PyPDFLoader<br/>Extract Text]
+            Chunk[LangChain<br/>Text Splitter]
+        end
+        
+        subgraph Query [Query Processing]
+            Search[ChromaDB<br/>Similarity Search]
+            PromptGen[Prompt Construction<br/>Inject Top 4 Contexts]
+            Router[Provider Router]
+        end
+    end
+    class Backend backend;
+
+    VectorDB[(ChromaDB<br/>Local Vector DB)]
+    class VectorDB db;
+
+    subgraph ExternalProviders [External LLM APIs]
+        Anthropic[Anthropic API]
+        OpenAI[OpenAI API]
+        Google[Google Gemini API]
+        Mistral[Mistral API]
+        Cohere[Cohere API]
+        Groq[Groq API]
+    end
+    class ExternalProviders llm;
+
+    %% Edges
+    UI -- "1. Upload PDF (.pdf)" --> API
+    API -- "/upload" --> Parse
+    Parse --> Chunk
+    Chunk -- "Embed & Store" --> VectorDB
+
+    Config -. "User specifies Key/Model" .-> UI
+    UI -- "2. Ask Question" --> API
+    
+    API -- "/query" --> Search
+    Search -- "Retrieve relevant chunks" --> VectorDB
+    VectorDB -- "Top 4 Contexts" --> Search
+    Search --> PromptGen
+    PromptGen --> Router
+    
+    Router -- "Model + API Key" --> Anthropic
+    Router -- "Model + API Key" --> OpenAI
+    Router -- "Model + API Key" --> Google
+    Router -- "Model + API Key" --> Mistral
+    Router -- "Model + API Key" --> Cohere
+    Router -- "Model + API Key" --> Groq
+    
+    Anthropic -. "Answer" .-> Router
+    OpenAI -. "Answer" .-> Router
+    Google -. "Answer" .-> Router
+    Mistral -. "Answer" .-> Router
+    Cohere -. "Answer" .-> Router
+    Groq -. "Answer" .-> Router
+    
+    Router -- "Return Answer & Sources" --> UI
 ```
 
 ---
